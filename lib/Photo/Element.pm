@@ -9,11 +9,11 @@ class Photo::Element {
     use Const::Fast;
     use Image::ExifTool;
 
-    use GMTDiff;
+    use TimeUtils;
 
     our $VERSION = '0.1';
 
-    const my $GMT_DIFF => GMTDiff::getDifference();
+    const my $GMT_DIFF => TimeUtils::getGMTDifference();
 
     const my %C_ALLOWED_FORMATS => map { $_ => 1 } qw(
         360  DR4  IIQ  MPO  PSB
@@ -57,12 +57,14 @@ class Photo::Element {
         return;
     }
 
-    has $path :param :reader;
-    has $diff :param :reader = 0;
+    has $path           :param :reader;
+    has $diff           :param :reader = 0;
+    has $expectedOffset :param :reader = $TimeUtils::ZERO_OFFSET;
 
     has $fileName  :reader;
     has $newDate   :reader;
     has $extension :reader;
+    has $offset    :reader;
 
     has $exifTool;
 
@@ -87,9 +89,30 @@ class Photo::Element {
             croak "Could not extract date from exif for file: '$path'";
         }
 
-        $newDate = $date + $diff + $GMT_DIFF;
+		$offset = $exifTool->GetValue('OffsetTime')
+                // $exifTool->GetValue('OffsetTimeOriginal')
+                // $exifTool->GetValue('OffsetTimeDigitized')
+				// $TimeUtils::ZERO_OFFSET;
+
+		# Calcualte and add offsets:
+		#
+		# GMT_DIFF is always added because when exifTool extracts the date
+		# it always returns the epoch time for GMT time
+		# (removes *machine* timezone)
+		#
+		# extraOffset exists because some cameras do store 'offset' exif flag
+		# in a different way for photos and videos. For example Google Pixel 6a:
+		# It stores exif offset for photos but it does not for videos.
+		# So we need to normalize the offset for all the items.
+
+		my $extraOffset = $expectedOffset eq $offset
+			? 0
+			: TimeUtils::offsetToSeconds($expectedOffset);
+
+        $newDate = $date + $diff + $GMT_DIFF + $extraOffset;
 
         $extension = extractExtension($path);
+
 
         return;
     }

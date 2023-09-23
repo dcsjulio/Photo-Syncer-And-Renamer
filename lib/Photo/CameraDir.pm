@@ -9,6 +9,7 @@ class Photo::CameraDir {
     use File::Find::Rule;
 
     use Photo::Element;
+	use TimeUtils;
 
     our $VERSION = '0.1';
 
@@ -27,6 +28,7 @@ class Photo::CameraDir {
     has $path    :param;
     has $depth   :param;
     has $setDiff :param = 0;
+	has $offset  :param = $TimeUtils::ZERO_OFFSET;
 
     BUILD (%params) {
         _validate(%params);
@@ -41,7 +43,13 @@ class Photo::CameraDir {
 
         my @photos =
             sort { uc $a->fileName cmp uc $b->fileName }
-            map { Photo::Element->new( path => $_, diff => $setDiff ) }
+            map {
+				Photo::Element->new(
+					path           => $_,
+					diff           => $setDiff,
+					expectedOffset => $offset,
+				)
+			}
             $finder->in($path);
 
         return @photos;

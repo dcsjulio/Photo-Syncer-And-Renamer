@@ -28,16 +28,18 @@ class Photo::Syncer {
         my $masterPath = shift $syncPhotos->@*;
         my $master = Photo::Element->new( path => $masterPath );
         push @cameraDirs, Photo::CameraDir->new(
-            path  => dirname($masterPath),
-            depth => $params{depth}
+            path   => dirname($masterPath),
+            depth  => $params{depth},
+			offset => $master->offset,
         );
 
         foreach my $photoPath ( $syncPhotos->@* ) {
-            my $photo = Photo::Element->new( path => $photoPath );
+            my $slave = Photo::Element->new( path => $photoPath );
             push @cameraDirs, Photo::CameraDir->new(
                 path    => dirname($photoPath),
-                setDiff => $master->newDate - $photo->newDate,
-                depth   => $params{depth}
+                setDiff => $master->newDate - $slave->newDate,
+                depth   => $params{depth},
+				offset  => $slave->offset,
             );
         }
 
