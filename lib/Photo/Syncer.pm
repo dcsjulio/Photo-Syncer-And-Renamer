@@ -30,7 +30,7 @@ class Photo::Syncer {
         push @cameraDirs, Photo::CameraDir->new(
             path   => dirname($masterPath),
             depth  => $params{depth},
-			offset => $master->offset,
+            offset => $master->offset,
         );
 
         foreach my $photoPath ( $syncPhotos->@* ) {
@@ -39,7 +39,7 @@ class Photo::Syncer {
                 path    => dirname($photoPath),
                 setDiff => $master->newDate - $slave->newDate,
                 depth   => $params{depth},
-				offset  => $slave->offset,
+                offset  => $slave->offset,
             );
         }
 

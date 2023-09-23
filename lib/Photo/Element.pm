@@ -89,25 +89,25 @@ class Photo::Element {
             croak "Could not extract date from exif for file: '$path'";
         }
 
-		$offset = $exifTool->GetValue('OffsetTime')
+        $offset = $exifTool->GetValue('OffsetTime')
                 // $exifTool->GetValue('OffsetTimeOriginal')
                 // $exifTool->GetValue('OffsetTimeDigitized')
-				// $TimeUtils::ZERO_OFFSET;
+                // $TimeUtils::ZERO_OFFSET;
 
-		# Calcualte and add offsets:
-		#
-		# GMT_DIFF is always added because when exifTool extracts the date
-		# it always returns the epoch time for GMT time
-		# (removes *machine* timezone)
-		#
-		# extraOffset exists because some cameras do store 'offset' exif flag
-		# in a different way for photos and videos. For example Google Pixel 6a:
-		# It stores exif offset for photos but it does not for videos.
-		# So we need to normalize the offset for all the items.
+        # Calcualte and add offsets:
+        #
+        # GMT_DIFF is always added because when exifTool extracts the date
+        # it always returns the epoch time for GMT time
+        # (removes *machine* timezone)
+        #
+        # extraOffset exists because some cameras do store 'offset' exif flag
+        # in a different way for photos and videos. For example Google Pixel 6a:
+        # It stores exif offset for photos but it does not for videos.
+        # So we need to normalize the offset for all the items.
 
-		my $extraOffset = $expectedOffset eq $offset
-			? 0
-			: TimeUtils::offsetToSeconds($expectedOffset);
+        my $extraOffset = $expectedOffset eq $offset
+            ? 0
+            : TimeUtils::offsetToSeconds($expectedOffset);
 
         $newDate = $date + $diff + $GMT_DIFF + $extraOffset;
 
