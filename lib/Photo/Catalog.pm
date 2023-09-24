@@ -59,9 +59,12 @@ class Photo::Catalog {
         $self->_safeCopyMove( $photo, $doCopy, $newDestination );
 
         return Photo::Element->new(
-            path => $newDestination,
-            diff => $photo->diff
+            path           => $newDestination,
+            diff           => $photo->diff,
+			expectedOffset => $photo->expectedOffset,
         );
+		
+		# TODO: update date and commit
     }
 
     method _safeCopyMove ( $photo, $doCopy, $newDestination ) {

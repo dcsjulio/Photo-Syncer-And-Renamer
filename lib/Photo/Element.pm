@@ -105,14 +105,15 @@ class Photo::Element {
         # It stores exif offset for photos but it does not for videos.
         # So we need to normalize the offset for all the items.
 
-        my $extraOffset = $expectedOffset eq $offset
-            ? 0
-            : TimeUtils::offsetToSeconds($expectedOffset);
+		my $isVideo = $exifTool->GetValue('TrackID') ? 1 : 0;
+
+        my $extraOffset = ( $isVideo && $expectedOffset ne $offset )
+            ? TimeUtils::offsetToSeconds($expectedOffset)
+            : 0;
 
         $newDate = $date + $diff + $GMT_DIFF + $extraOffset;
 
         $extension = extractExtension($path);
-
 
         return;
     }
